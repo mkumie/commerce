@@ -1,3 +1,5 @@
+from typing import List
+from unicodedata import category
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -5,10 +7,16 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from .models import User
+from .forms import *
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+
+    listings = Listings.objects.all()
+
+    return render(request, "auctions/index.html", {
+        'listings': listings,
+    })
 
 
 def login_view(request):
@@ -61,3 +69,64 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+
+def add_listings(request):
+
+    data = Listings()
+    
+    if request.method == 'POST':
+
+        form = AddListing(request.POST, instance=data)
+
+        if form.is_valid:
+
+            form.save()
+
+            return HttpResponseRedirect(reverse("index"))
+
+    form = AddListing()
+
+    return render(request, "auctions/add_listing.html", {
+        'form': form,
+    })
+
+
+def display_listing(request, list_id):
+
+    if request.method == 'GET':
+        
+        listing = Listings.objects.get(pk=list_id)
+
+        form = ViewListing(instance=listing)
+
+        return render(request, 'auctions/display_listing.html', {
+            'form': form,
+            'listing': listing,
+        })
+
+
+def categories(request):
+
+    categories = []
+    
+    listings = Listings.objects.exclude(category__isnull=True).exclude(category="")
+
+    for listing in listings:
+        categories.append(listing.category)
+
+    categories = set(categories)
+
+    return render(request, 'auctions/categories.html', {
+        'categories': categories,
+    })
+
+
+def display_category(request, category):
+    
+    listings = Listings.objects.filter(category=category)
+
+    return render(request, 'auctions/display_category.html', {
+        'listings': listings,
+        'category': category,
+    })

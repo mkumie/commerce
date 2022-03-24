@@ -1,3 +1,4 @@
+from cProfile import label
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -12,8 +13,8 @@ class Listings(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     initial_bid = models.FloatField()
-    url = models.URLField(null=True)
-    category = models.CharField(max_length=200, null=True)
+    url = models.URLField(blank=True)
+    category = models.CharField(max_length=200, blank=True)
 
     
     def __str__(self):

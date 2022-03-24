@@ -1,0 +1,16 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<h2>{{ listing.title }}</h2>
+<div class="form-group">
+
+    <form>
+        
+        <div>
+            {{ form.as_p }}
+        </div>
+        
+    </form>
+
+</div>
+{% endblock %}
