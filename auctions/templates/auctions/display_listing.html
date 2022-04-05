@@ -5,12 +5,59 @@
 <div class="form-group">
 
     <form>
-        
+
         <div>
-            {{ form.as_p }}
+            {% for field in form %}
+
+            {{ field.label_tag }}
+
+            {% if field == form.image %}
+            <p>
+                <img src="{% if img.image %} {{ img.image.url }} {% endif %}" alt="{{ img.title }}">
+            </p>
+            {% else %}
+            {{ field }}
+            {% endif %}
+
+            {% endfor %}
+
         </div>
-        
+
     </form>
+
+    <div>
+        {% if user.is_authenticated %}
+
+        <br>
+
+        <a href="{% url 'watchlist_add' listing.id %}" role="button" class="btn btn-online-success btn-lg">Add to
+            Watchlist</a>
+
+        <form action="{% url 'bid' listing.id %}" method="post">
+
+            {% csrf_token %}            
+
+            <div class="form-group">
+                <input class="form-control" type="text" name="bid" placeholder="{{ listing.initial_bid }}" required>
+            </div>
+
+            {% if messages %}
+            <ul class="alert-warning">
+                {% for message in messages %}
+                <li>
+                    {{ message }}
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <input class="btn btn-primary" type="submit" value="Place Bid">
+
+        </form>
+
+        {% endif %}
+
+    </div>
 
 </div>
 {% endblock %}

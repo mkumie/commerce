@@ -1,6 +1,16 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
+    {% if messages %}
+        <ul class="alert-warning">
+            {% for message in messages %}
+               <li>
+                    {{ message }}
+               </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     <h2>Active Listings</h2>
     {% for listing in listings %}
 

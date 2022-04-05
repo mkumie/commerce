@@ -15,16 +15,16 @@ class AddListing(forms.ModelForm): # (forms.Form):
             })
 
     class Meta:
-        model = Listings
+        model = Listing
         fields = '__all__' # ['title', 'description', 'initial_bid', 'url', 'category']
         labels = {'title': 'Title', 'description': 'Description', 'initial_bid': 'Initial Bid', 'url': 'Website', 'category': 'Category'}
 
 
 
-class AddComments(forms.Form):
+class AddComment(forms.Form):
 
     user = User()
-    listing = Listings()
+    listing = Listing()
     comment = forms.Textarea()
     # comments = forms.CharField(widget=forms.Textarea, label="", max_length=1000)
 
@@ -44,7 +44,7 @@ class ViewListing(forms.ModelForm):
             })
 
     class Meta:
-        model = Listings
+        model = Listing
         fields = '__all__'
-        labels = {'description': 'Description', 'initial_bid': 'Initial Bid', 'url': 'Website', 'category': 'Category'}
+        labels = {'initial_bid': 'Initial Bid',}
         exclude = ('title',)

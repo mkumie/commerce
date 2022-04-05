@@ -1,4 +1,5 @@
 from cProfile import label
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -8,12 +9,12 @@ class User(AbstractUser):
 
 
 
-class Listings(models.Model):
+class Listing(models.Model):
 
     title = models.CharField(max_length=100)
     description = models.TextField()
     initial_bid = models.FloatField()
-    url = models.URLField(blank=True)
+    image = models.ImageField(upload_to='listing_images/', blank=True)
     category = models.CharField(max_length=200, blank=True)
 
     
@@ -23,21 +24,37 @@ class Listings(models.Model):
 
 
 
-class Bids(models.Model):
+class Bid(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    listing = models.ForeignKey(Listings, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     bid = models.FloatField()
 
 
+    def __str__(self):
 
-class Comments(models.Model):
+        return f"{self.user}'s {self.listing} Bid"
+
+
+
+class Comment(models.Model):
 
     user = models.ManyToManyField(User)
-    listing = models.ManyToManyField(Listings)
+    listing = models.ManyToManyField(Listing)
     comment = models.TextField()
 
 
     def __str__(self):
 
         return self.comment
+
+
+
+class Watchlist(models.Model):
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    listings = models.ManyToManyField(Listing)
+
+
+    def __str__(self):
+        return f"{self.user}'s Watchlist"
