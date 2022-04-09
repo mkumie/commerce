@@ -139,16 +139,15 @@ def watchlist_add(request, listing_id):
     listing_to_save = get_object_or_404(Listing, pk=listing_id)
 
     if Watchlist.objects.filter(user=request.user, listings=listing_to_save).exists():
-        messages.add_message(request, messages.ERROR, 'You already have %s in your watchlist.' % listing_to_save) # add_message(request, messages.ERROR, "You already have it in your watchlist.")
+        messages.add_message(request, messages.ERROR, 'You already have %s in your watchlist.' % listing_to_save)
         return HttpResponseRedirect(reverse("index"))
 
     watch_list, created = Watchlist.objects.get_or_create(user=request.user)
 
     watch_list.listings.add(listing_to_save)
-    # watchlist.save()
-    messages.success(request, 'Successfully added %s to your watchlist.' % listing_to_save) # add_message(request, messages.SUCCESS, "Successfully added to your watchlist.")
+    messages.success(request, 'Successfully added %s to your watchlist.' % listing_to_save)
 
-    return watchlist(request, request.user) # render(request, "auctions/watchlist.html")
+    return watchlist(request, request.user)
 
 
 def watchlist(request, user):
@@ -173,12 +172,20 @@ def delete_watchlist(request, listing_id):
 def bid(request, listing_id):
     
     listing = Listing.objects.get(pk=listing_id)
-    bid = float(request.POST['bid'])
+    bid = 0.0
     user = request.user
+
+    # If not a number/float prompt for appropriate input
+    try:
+        bid = float(request.POST['bid'])
+    except ValueError:
+        messages.add_message(request, messages.ERROR, 'Bid value should be a number. "%s" is not a number.' % request.POST['bid'])
+        return HttpResponseRedirect(reverse('display_listing', args=(listing_id,)))
 
     check = False
     bid_value = 0.0
-    biddings = Bid.objects.all()
+    highest_bid = listing.initial_bid
+    biddings = Bid.objects.filter(listing=listing)
 
     # Check if such bid exists for the listing and update or create otherwise
     for bidding in biddings:
@@ -186,25 +193,37 @@ def bid(request, listing_id):
         if bidding.user == user and bidding.listing == listing:
             bid_value = bidding.bid
             check = True
-            continue
-      
-    if bid > listing.initial_bid:
-        if check:
-            place_bid = Bid.objects.get(user=user, listing=listing, bid=bid_value)
-            
+
+        if bidding.listing == listing and bidding.bid > highest_bid:
+            highest_bid = bidding.bid
+
+    # If such bid exists...  
+    if check:
+        
+        place_bid = Bid.objects.get(user=user, listing=listing, bid=bid_value)
+
+        if bid > highest_bid:    
             place_bid.bid = bid
             place_bid.save()
 
         else:
+            messages.add_message(request, messages.ERROR, 'Bid value should be greater than %s.' % highest_bid)
+    
+    # Otherwise...
+    else:
+        if bid == listing.initial_bid and (biddings.count() == 0):
             place_bid = Bid.objects.create(user=user, listing=listing, bid=bid)
-        
-        if biddings.filter(listing=listing).count() == 1:
-            messages.add_message(request, messages.INFO, 'There is 1 bid to this listing.')
+
+        elif bid > highest_bid:
+            place_bid = Bid.objects.create(user=user, listing=listing, bid=bid)
 
         else:
-            messages.add_message(request, messages.INFO, 'There are %s bids to this listing.' % biddings.filter(listing=listing).count())
+            messages.add_message(request, messages.ERROR, 'Bid value should be greater than %s.' % highest_bid)
         
-    else:
-        messages.add_message(request, messages.ERROR, 'Bid value should be greater than %s.' % listing.initial_bid)
+    if biddings.filter().count() == 1:
+            messages.add_message(request, messages.INFO, 'There is 1 bid to this listing.')
 
-    return HttpResponseRedirect(reverse('display_listing', args=(listing_id,))) # display_listing(request, listing_id)
+    else:
+            messages.add_message(request, messages.INFO, 'There are %s bids to this listing.' % biddings.filter(listing=listing).count())
+     
+    return HttpResponseRedirect(reverse('display_listing', args=(listing_id,)))
