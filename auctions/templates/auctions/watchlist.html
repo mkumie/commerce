@@ -1,0 +1,28 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+{% if messages %}
+    <ul class="alert-success">
+        {% for message in messages %}
+            <li>
+                {{ message }}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<h2>Watchlist</h2>
+<div>
+
+    {% for list in watchlist %}
+        <ul>
+            <a href="{% url 'display_listing' list.id %}">{{ list.title }}</a>&rsaquo;&rsaquo;&rsaquo;&rsaquo;&rsaquo;&rsaquo;&rsaquo;<a href="{% url 'delete_watchlist' list.id %}">Remove from Watchlist.</a>
+        </ul>
+    {% empty %}
+        <p>Sorry, there is no list to watch yet.</p>
+
+    {% endfor %}
+
+</div>
+{% endblock %}

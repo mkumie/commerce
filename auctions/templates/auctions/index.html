@@ -1,7 +1,27 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
+    {% if messages %}
+        <ul class="alert-warning">
+            {% for message in messages %}
+               <li>
+                    {{ message }}
+               </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
-    TODO
+    <h2>Active Listings</h2>
+    {% for listing in listings %}
+
+        <ul>
+            <a href="{% url 'display_listing' listing.id %}">{{ listing.title }}</a>
+        </ul>
+    
+    {% empty %}
+        
+        <p>There is no listing yet.</p>
+
+    {% endfor %}
+
 {% endblock %}
